@@ -1,0 +1,470 @@
+<!-- -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Sinh Viên</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4a49c5',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-backdrop {
+            animation: fadeInBackdrop 0.2s ease-in;
+        }
+
+        @keyframes fadeInBackdrop {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-[#181818] transition-colors duration-200">
+    <div id="root"></div>
+
+    <!-- -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Custom Modal Component
+        function Modal({ isOpen, onClose, title, children }) {
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                    <div className="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
+                                <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none">
+                                    ×
+                                </button>
+                            </div>
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Confirm Dialog Component
+        function ConfirmDialog({ isOpen, onClose, onConfirm, message }) {
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title="Xác nhận">
+                    <p className="text-gray-700 dark:text-gray-300 mb-6">{message}</p>
+                    <div className="flex justify-end space-x-3">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 text-base text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={() => {
+                                onConfirm();
+                                onClose();
+                            }}
+                            className="px-4 py-2 text-base bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </Modal>
+            );
+        }
+
+        // Student Form Component
+        function StudentForm({ isOpen, onClose, onSubmit, student }) {
+            const [formData, setFormData] = useState({
+                name: '',
+                studentId: '',
+                age: '',
+                major: '',
+                email: ''
+            });
+
+            useEffect(() => {
+                if (student) {
+                    setFormData(student);
+                } else {
+                    setFormData({
+                        name: '',
+                        studentId: '',
+                        age: '',
+                        major: '',
+                        email: ''
+                    });
+                }
+            }, [student, isOpen]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formData.name.trim() || !formData.studentId.trim()) {
+                    return;
+                }
+                onSubmit(formData);
+                onClose();
+            };
+
+            return (
+                <Modal isOpen={isOpen} onClose={onClose} title={student ? 'Chỉnh sửa sinh viên' : 'Thêm sinh viên mới'}>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Họ và tên <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                className="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="Nguyễn Văn A"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Mã sinh viên <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.studentId}
+                                onChange={(e) => setFormData({...formData, studentId: e.target.value})}
+                                className="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="SV001"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Tuổi
+                            </label>
+                            <input
+                                type="number"
+                                value={formData.age}
+                                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                                className="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="20"
+                                min="15"
+                                max="100"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Chuyên ngành
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.major}
+                                onChange={(e) => setFormData({...formData, major: e.target.value})}
+                                className="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="Công nghệ thông tin"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                className="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="student@example.com"
+                            />
+                        </div>
+                        <div className="flex justify-end space-x-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 text-base text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 text-base bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors"
+                            >
+                                {student ? 'Cập nhật' : 'Thêm'}
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            );
+        }
+
+        // Student Card Component
+        function StudentCard({ student, onEdit, onDelete }) {
+            return (
+                <div className="fade-in bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-5 border border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{student.name}</h3>
+                            <p className="text-sm text-primary font-medium">MSV: {student.studentId}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => onEdit(student)}
+                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                title="Chỉnh sửa"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => onDelete(student)}
+                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                title="Xóa"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                        {student.age && (
+                            <p className="text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Tuổi:</span> {student.age}
+                            </p>
+                        )}
+                        {student.major && (
+                            <p className="text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Ngành:</span> {student.major}
+                            </p>
+                        )}
+                        {student.email && (
+                            <p className="text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Email:</span> {student.email}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [students, setStudents] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [isFormOpen, setIsFormOpen] = useState(false);
+            const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+            const [editingStudent, setEditingStudent] = useState(null);
+            const [deletingStudent, setDeletingStudent] = useState(null);
+
+            // Load students from localStorage
+            useEffect(() => {
+                const savedStudents = localStorage.getItem('students');
+                if (savedStudents) {
+                    setStudents(JSON.parse(savedStudents));
+                }
+            }, []);
+
+            // Save students to localStorage
+            useEffect(() => {
+                localStorage.setItem('students', JSON.stringify(students));
+            }, [students]);
+
+            // Dark mode setup
+            useEffect(() => {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                    if (event.matches) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                });
+            }, []);
+
+            const handleAddStudent = (studentData) => {
+                setStudents([...students, { ...studentData, id: Date.now() }]);
+            };
+
+            const handleEditStudent = (studentData) => {
+                setStudents(students.map(s => s.id === editingStudent.id ? { ...studentData, id: s.id } : s));
+                setEditingStudent(null);
+            };
+
+            const handleDeleteStudent = () => {
+                setStudents(students.filter(s => s.id !== deletingStudent.id));
+                setDeletingStudent(null);
+            };
+
+            const openEditForm = (student) => {
+                setEditingStudent(student);
+                setIsFormOpen(true);
+            };
+
+            const openDeleteConfirm = (student) => {
+                setDeletingStudent(student);
+                setIsConfirmOpen(true);
+            };
+
+            const closeForm = () => {
+                setIsFormOpen(false);
+                setEditingStudent(null);
+            };
+
+            const filteredStudents = students.filter(student =>
+                student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (student.major && student.major.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            return (
+                <div className="min-h-screen bg-white dark:bg-[#181818] transition-colors duration-200">
+                    <div className="max-w-7xl mx-auto px-4 py-8">
+                        {/* Header */}
+                        <div className="mb-8">
+                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                                Quản Lý Sinh Viên
+                            </h1>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                Quản lý thông tin sinh viên một cách dễ dàng và hiệu quả
+                            </p>
+                        </div>
+
+                        {/* Search and Add Bar */}
+                        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+                            <div className="flex-1 relative">
+                                <input
+                                    type="text"
+                                    placeholder="Tìm kiếm theo tên, mã SV, hoặc ngành..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full px-4 py-3 pl-11 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                />
+                                <svg className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <button
+                                onClick={() => setIsFormOpen(true)}
+                                className="px-6 py-3 text-base bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center space-x-2 font-medium"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>Thêm sinh viên</span>
+                            </button>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="mb-6 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-wrap gap-4 text-sm">
+                                <div>
+                                    <span className="text-gray-600 dark:text-gray-400">Tổng số sinh viên:</span>
+                                    <span className="ml-2 font-semibold text-primary">{students.length}</span>
+                                </div>
+                                {searchTerm && (
+                                    <div>
+                                        <span className="text-gray-600 dark:text-gray-400">Kết quả tìm kiếm:</span>
+                                        <span className="ml-2 font-semibold text-primary">{filteredStudents.length}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Student Grid */}
+                        {filteredStudents.length === 0 ? (
+                            <div className="text-center py-16">
+                                <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <p className="text-gray-500 dark:text-gray-400 text-lg">
+                                    {searchTerm ? 'Không tìm thấy sinh viên nào' : 'Chưa có sinh viên nào'}
+                                </p>
+                                {!searchTerm && (
+                                    <button
+                                        onClick={() => setIsFormOpen(true)}
+                                        className="mt-4 px-6 py-2 text-base bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                    >
+                                        Thêm sinh viên đầu tiên
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filteredStudents.map(student => (
+                                    <StudentCard
+                                        key={student.id}
+                                        student={student}
+                                        onEdit={openEditForm}
+                                        onDelete={openDeleteConfirm}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Student Form Modal */}
+                    <StudentForm
+                        isOpen={isFormOpen}
+                        onClose={closeForm}
+                        onSubmit={editingStudent ? handleEditStudent : handleAddStudent}
+                        student={editingStudent}
+                    />
+
+                    {/* Delete Confirmation Dialog */}
+                    <ConfirmDialog
+                        isOpen={isConfirmOpen}
+                        onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={handleDeleteStudent}
+                        message={`Bạn có chắc chắn muốn xóa sinh viên "${deletingStudent?.name}"?`}
+                    />
+                </div>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

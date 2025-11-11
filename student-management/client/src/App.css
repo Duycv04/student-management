@@ -1,0 +1,122 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+/* Nền toàn màn hình */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4f46e5, #9333ea, #ec4899);
+}
+
+/* Hộp đăng nhập */
+.login-box {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  width: 380px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* Tiêu đề */
+.login-box h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 25px;
+}
+
+/* Ô nhập */
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+/* Icon */
+.icon {
+  position: absolute;
+  top: 17px;
+  left: 12px;
+  color: #9ca3af;
+  font-size: 16px;
+}
+
+/* Nút show/hide password */
+.show-pass-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 16px;
+  
+}
+
+/* Nút chính */
+.submit-btn {
+  width: 100%;
+  background-color: #3b82f6;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Quên mật khẩu + đăng ký */
+.forgot-password a,
+.register-link span {
+  justify-items: right;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  
+}
+
+.forgot-password a:hover,
+.register-link span:hover {
+  color: #1e40af;
+  text-decoration: none;
+  
+}
+
+/* Thông báo */
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #dc2626;
+}
+
+/* Liên kết đăng ký */
+.register-link {
+  margin-top: 20px;
+  color: #4b5563;
+  font-size: 14px;
+}
