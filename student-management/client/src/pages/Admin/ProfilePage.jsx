@@ -22,10 +22,6 @@ const ProfilePage = () => {
 
   // Khi component load -> gọi API lấy dữ liệu
   useEffect(() => {
-    // if (!id) {
-    //   toast.error("Không tìm thấy ID sinh viên!");
-    //   return;
-    // }
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
@@ -55,7 +51,7 @@ const ProfilePage = () => {
       await axios.put(`http://localhost:5000/api/profile/${id}`, profile);
       toast.success("Cập nhật thông tin thành công!");
     } catch (err) {
-      console.error("❌ Lỗi cập nhật:", err);
+      console.error(" Lỗi cập nhật:", err);
       toast.error("Lỗi khi cập nhật, vui lòng thử lại!");
     }
   };
