@@ -34,18 +34,14 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
-// ✅ API: Cập nhật hồ sơ sinh viên
+// API: Cập nhật hồ sơ sinh viên
 export const updateProfile = async (req, res) => {
   const { name, dob, gender, phone, class_id } = req.body;
   const studentCode = req.user.student_code;
   let imgPath = null;
-
   if (req.file) {
     imgPath = req.file.filename;
   }
-
   try {
     const current = await pool.query(
       "SELECT img FROM sinhvien WHERE id=$",

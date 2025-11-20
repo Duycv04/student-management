@@ -20,7 +20,6 @@ router.post("/register", async (req, res) => {
   if (!username || !password || !email) {
     return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
   }
-
   try {
     const existing = await pool.query(
       "SELECT id FROM taikhoan WHERE username = $1",
@@ -29,9 +28,7 @@ router.post("/register", async (req, res) => {
     if (existing.rows.length > 0) {
       return res.status(400).json({ message: "Tên đăng nhập đã tồn tại" });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
     await pool.query(
       `INSERT INTO taikhoan (
         username, password, role,
@@ -51,14 +48,12 @@ router.post("/register", async (req, res) => {
         email,
       ]
     );
-
     res.status(201).json({ message: "Đăng ký thành công" });
   } catch (err) {
     console.error("Lỗi đăng ký:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
 });
-
 // Login account
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -100,9 +95,5 @@ router.post("/login", async (req, res) => {
     console.error("Lỗi đăng nhập:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
-
-  
 });
-
-
 export default router;

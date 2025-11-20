@@ -45,7 +45,7 @@ const ProfilePage = () => {
   };
 
   // ✅ Gửi cập nhật thông tin
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     try {
       await axios.put(`http://localhost:5000/api/profile/${id}`, profile);
@@ -54,8 +54,7 @@ const ProfilePage = () => {
       console.error(" Lỗi cập nhật:", err);
       toast.error("Lỗi khi cập nhật, vui lòng thử lại!");
     }
-  };
-
+  }
   if (loading)
     return <p className="text-center text-gray-600 mt-10">Đang tải dữ liệu...</p>;
 
